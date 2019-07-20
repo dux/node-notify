@@ -1,0 +1,17 @@
+/.gems
+/.bundle
+/log
+/tmp
+/public/assets
+/public/files
+/node_modules
+
+*/.DS_Store
+*.log
+.env*
+.deploy_log
+.DS_Store
+.DS_Store?
+Icon?
+ehthumbs.db
+Thumbs.db

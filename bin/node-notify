@@ -1,0 +1,1 @@
+npx coffee node_modules/@dinoreic/node-notify/app/index.coffee

@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Socket.IO Chat Example</title>
+  <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+  <script src="http://localhost:8000/socket.io/socket.io.js"></script>
+  <script src="./demo.js"></script>
+  <style>
+    * { font-size: 12pt; font-family: helvetica; }
+    input, button, textarea { padding: 5px; }
+    textarea { width: 400px; height: 120px; margin-top: 10px; margin-left: 2px; }
+  </style>
+</head>
+<body style="padding:30px;">
+  <h1>Channel: <script>document.write(window.channel_id)</script></h1>
+  <input id="nick" placeholder="nick" />
+  <input id="textdata" placeholder="msg" />
+  <button onclick="add_to_chat()">Test it</button>
+  <br />
+  <textarea id="chat_data"></textarea>
+  <br />
+  <br />
+  <input id="mouse" />
+
+  <br />
+  <br />
+  <h2>Global channel</h2>
+  <input id="global_input" placeholder="nick" />
+  <button onclick="add_to_global()">Send to all</button>
+  <br />
+  <textarea id="gobal_data"></textarea>
+</body>
+</html>

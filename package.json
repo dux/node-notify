@@ -1,0 +1,20 @@
+{
+  "name": "@dinoreic/node-notify",
+  "version": "0.1.2",
+  "main": "app/index.js",
+  "author": "Dino Reic",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "coffeescript": "^2.4.1",
+    "express": "^4.17.1",
+    "socket.io": "^2.2.0"
+  },
+  "bin": {
+    "node-notify": "./bin/node-notify"
+  },
+  "scripts": {
+    "app": "npx coffee app/index.coffee",
+    "dev": "find . | entr -r npx coffee app/index.coffee"
+  }
+}
