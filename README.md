@@ -31,6 +31,10 @@ CONFIG =
 
 `npm install @dinoreic/node-notify`
 
+or
+
+`yarn add @dinoreic/node-notify`
+
 ### run server
 
 `npx node-notify`
@@ -39,46 +43,18 @@ CONFIG =
 ### app javascript  - connect to server
 
 ```coffeescript
-class NodeNotify
-  constructor: (@server) ->
-    @subs = {}
-
-    unless window.io
-      $.getScript "#{@server}/socket.io/socket.io.js"
-
-  sub: (name, func) =>
-    @subs[name] = (data) =>
-      return unless @socket
-      func data
-
-  connect: (func) ->
-    channel = func()
-
-    if channel && window.io
-      url = "#{@server}/c/#{channel}"
-      $.get url, (response) =>
-        @socket = io.connect(url)
-        @socket.on 'msg', (response) =>
-          if c = @subs[response.func]
-            c response.data
-    else
-      setTimeout =>
-        @connect(func)
-      , 200
-
+import NodeNotify from '@dinoreic/node-notify'
 
 $ ->
   notify = new NodeNotify 'http://localhost:8000'
 
   # respond to
   notify.sub 'message', (data) ->
-    Info.ok data.data
+    alert data.data
 
   # connect if we have user id
-  notify.connect ->
-    return unless window.app
-    return unless window.app.user
-    window.app.user.uid
+  notify.connect -> window.user_uid
+
 ```
 
 ### Send message to node-notify via curl
