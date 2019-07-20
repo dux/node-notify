@@ -13,6 +13,20 @@ It can update specific channel or broadcast on all channels
 * install client script and connect to chanell
 * update node notify via curl
 
+### ENV
+
+```coffeescript
+CONFIG =
+  # server port
+  port:   process.env.PORT or 8000
+
+  # server secret, if defined cant update channel from server without sending ?secret= param
+  secret: process.env.SECRET || 'tajna'
+
+  # "Access-Control-Allow-Origin" header param
+  origin: process.env.ORIGIN '*'
+```
+
 ### install
 
 `npm install @dinoreic/node-notify`
@@ -25,36 +39,46 @@ It can update specific channel or broadcast on all channels
 ### app javascript  - connect to server
 
 ```coffeescript
-window.node_notify_server = 'http://localhost:8000'
+class NodeNotify
+  constructor: (@server) ->
+    @subs = {}
 
-PubSub = ->
-  @subs = {}
+    unless window.io
+      $.getScript "#{@server}/socket.io/socket.io.js"
 
-  @connect = (channel) ->
-    $.getScript "#{window.node_notify_server}/socket.io/socket.io.js", =>
-      url = "#{window.node_notify_server}/c/#{channel}"
+  sub: (name, func) =>
+    @subs[name] = (data) =>
+      return unless @socket
+      func data
 
+  connect: (func) ->
+    channel = func()
+
+    if channel && window.io
+      url = "#{@server}/c/#{channel}"
       $.get url, (response) =>
         @socket = io.connect(url)
         @socket.on 'msg', (response) =>
           if c = @subs[response.func]
             c response.data
+    else
+      setTimeout =>
+        @connect(func)
+      , 200
 
-  @sub = (name, func) =>
-    @subs[name] = (data) =>
-      return unless @socket
-      func data
 
-  @
+$ ->
+  notify = new NodeNotify 'http://localhost:8000'
 
-user_channel = new PubSub()
-user_channel.connect 'usr-1'
+  # respond to
+  notify.sub 'message', (data) ->
+    Info.ok data.data
 
-#
-
-user_channel.sub 'message', (data) ->
-  Info.ok data.data
-
+  # connect if we have user id
+  notify.connect ->
+    return unless window.app
+    return unless window.app.user
+    window.app.user.uid
 ```
 
 ### Send message to node-notify via curl
