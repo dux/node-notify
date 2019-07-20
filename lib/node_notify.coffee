@@ -1,3 +1,4 @@
+# register window.NodeNotify
 class window.NodeNotify
   constructor: (@server) ->
     @subs = {}
@@ -27,3 +28,7 @@ class window.NodeNotify
         @connect(func)
       , 200
 
+
+# export module if supported
+if module && module.exports
+  module.exports = window.NodeNotify

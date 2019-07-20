@@ -1,6 +1,6 @@
 {
   "name": "@dinoreic/node-notify",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "main": "lib/node_notify.js",
   "author": "Dino Reic",
   "license": "MIT",
