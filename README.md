@@ -4,6 +4,8 @@ Made as a replacement for Rails ActionCable, but can be used on any backend.
 
 There is no need for a socket connection from a server, clean update interface via HTTP POST.
 
+It can update specific channel or broadcast on all channels
+
 ### Steps to make is work
 
 * install
@@ -11,14 +13,9 @@ There is no need for a socket connection from a server, clean update interface v
 * install client script and connect to chanell
 * update node notify via curl
 
-### What this notify can't to?
-
-It can't conect to multiply channels. You can have only one connection server<->user.
-
 ### install
 
 `npm install @dinoreic/node-notify`
-
 
 ### run server
 
@@ -62,14 +59,22 @@ user_channel.sub 'message', (data) ->
 
 ### Send message to node-notify via curl
 
-#### Example 1
-
 `curl -d 'JSON_DATA' -H "Content-Type: application/json" localhost:8000/c/CHANNEL/FUNCTION`
 
-#### Example 2
-`curl -d '{"data":"hello from server"}' -H "Content-Type: application/json" localhost:8000/c/usr-1/message`
+
+#### Example: send to specific channel named "usr-1"
+`curl -d '{"data":"hi from node notify server"}' -H "Content-Type: application/json" localhost:8000/c/usr-1/message`
+
+
+#### Example: boradcast the same message to all connected clients
+`curl -d '{"data":"hi from node notify server"}' -H "Content-Type: application/json" localhost:8000/b/message`
+
 
 #### Test script for constant ping
 
-```while true; do curl -d '{"data":"'+`openssl rand -base64 32`+'"}' -H "Content-Type: application/json" localhost:8000/c/usr-1/message; sleep 2; done```
+```
+  while true; do curl -d '{"data":"'+`openssl rand -base64 32`+'"}' -H "Content-Type: application/json" localhost:8000/c/usr-1/message; sleep 1; done
+
+  while true; do curl -d '{"data":"'+`openssl rand -base64 32`+'"}' -H "Content-Type: application/json" localhost:8000/b/message; sleep 1; done
+```
 

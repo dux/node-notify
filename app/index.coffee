@@ -14,29 +14,31 @@ server.listen port, ->
 
 #
 
-class History
-  DATA = {}
+CHANNELS = {}
 
+class History
   @send = (res, name, message) ->
-    DATA[name] ||= []
+    CHANNELS[name] ||= []
     history = new History name
     history.update message if message
     history.send res
 
   constructor: (@name) ->
-    DATA[@name] ||= []
+    CHANNELS[@name] ||= []
 
   send: (res) ->
-    res.type('json').send JSON.stringify(DATA[@name], null, 2)
+    res.type('json').send stringify(CHANNELS[@name])
 
-  update: (message) ->
-    c = DATA[@name]
-    c.push(message)
+  update: (@message) ->
+    c = CHANNELS[@name]
+    c.push(@message)
     c.shift() if c.length > 5
 
-#
+stringify = (data) -> JSON.stringify(data, null, 2)+"\n"
 
-# get channel messages
+# core
+
+# get channel messages, ping channel
 app.get '/c/:channel', (req, res) ->
   res.set 'Access-Control-Allow-Origin': '*'
 
@@ -52,10 +54,30 @@ app.post '/c/:channel/:command', (req, res) ->
     data: req.body
   }
 
+  console.log("Channel #{name}: #{JSON.stringify(object.data)}")
+
   io.of("/c/#{name}").emit('msg', object);
 
   History.send(res, name, object.data)
 
+# brodcast command to all channels
+app.post '/b/:command', (req, res) ->
+  res.set 'Access-Control-Allow-Origin': '*'
+
+  command = req.params['command']
+  object  = {
+    func: command,
+    data: req.body
+  }
+
+  keys = Object.keys(CHANNELS)
+
+  for name in keys
+    io.of("/c/#{name}").emit('msg', object);
+
+  console.log("Broadcast to #{keys.length} clients: #{JSON.stringify(object.data)}")
+
+  res.send stringify(object)
 
 # other pages
 
