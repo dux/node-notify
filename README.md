@@ -62,9 +62,14 @@ user_channel.sub 'message', (data) ->
 
 ### Send message to node-notify via curl
 
-Example 1
+#### Example 1
+
 `curl -d 'JSON_DATA' -H "Content-Type: application/json" localhost:8000/c/CHANNEL/FUNCTION`
 
-Example 2
-`curl -d '{"message":"hello from server"}' -H "Content-Type: application/json" localhost:8000/c/usr-1/message`
+#### Example 2
+`curl -d '{"data":"hello from server"}' -H "Content-Type: application/json" localhost:8000/c/usr-1/message`
+
+#### Test script for constant ping
+
+```while true; do curl -d '{"data":"'+`openssl rand -base64 32`+'"}' -H "Content-Type: application/json" localhost:8000/c/usr-1/message; sleep 2; done```
 

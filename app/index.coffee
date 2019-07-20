@@ -12,42 +12,50 @@ server.listen port, ->
   console.log "Server listening at port %d", port
   return
 
-sockets_cache   = {}
-sockets_history = {}
+#
 
-socket_connect = (name) ->
-  # io.of(req.path) MUST BE ON req.path !!! can't br generic name
-  sockets_history[name] ||= {}
-  sockets_cache[name] ||= io.of(name).on "connection", (socket) ->
-    console.log "Channel init: #{name}"
-    socket.on "all", (data) ->
-      console.log [name, data]
-      socket_emit(name, data)
+class History
+  DATA = {}
 
-socket_emit = (channel, object) ->
-  # object['data']['_time'] = new Date().getTime()
-  io.of(channel).emit('msg', object);
+  @send = (res, name, message) ->
+    DATA[name] ||= []
+    history = new History name
+    history.update message if message
+    history.send res
 
-  c = sockets_history[channel][object.func] ||= []
-  c.push(object.data)
-  c.shift() if c.length > 5
+  constructor: (@name) ->
+    DATA[@name] ||= []
 
-format_response = (channel) ->
-  JSON.stringify sockets_history[channel], null, 2
+  send: (res) ->
+    res.type('json').send JSON.stringify(DATA[@name], null, 2)
 
-# get chennel messages
+  update: (message) ->
+    c = DATA[@name]
+    c.push(message)
+    c.shift() if c.length > 5
+
+#
+
+# get channel messages
 app.get '/c/:channel', (req, res) ->
   res.set 'Access-Control-Allow-Origin': '*'
-  channel = "/c/#{req.params['channel']}"
-  socket_connect(channel)
-  res.type('json').send(format_response(channel))
 
-# update channel and a group
-app.post '/c/:channel/:group', (req, res) ->
-  channel = "/c/#{req.params['channel']}"
-  socket_connect(channel)
-  socket_emit(channel, { func:req.params['group'], data:req.body })
-  res.send(format_response(channel))
+  History.send(res, req.params['channel'])
+
+# send command to a channel
+app.post '/c/:channel/:command', (req, res) ->
+  res.set 'Access-Control-Allow-Origin': '*'
+
+  name    = req.params['channel']
+  object  = {
+    func: req.params['command'],
+    data: req.body
+  }
+
+  io.of("/c/#{name}").emit('msg', object);
+
+  History.send(res, name, object.data)
+
 
 # other pages
 
@@ -63,26 +71,3 @@ app.get '/demo.js', (req, res) ->
 app.get '/*', (req, res) ->
   res.status(404).send('page not found')
 
-
-  # if Object.keys(req.query).length > 0
-  #   console.log ["qs:#{ns_name}", 'all', req.query]
-  #   io.of(ns_name).emit('msg', req.query);
-
-
-# io.of('/room').on "connection", (socket) ->
-#   socket.on "all", (data) ->
-#     #  sending to all clients, include sender
-#     console.log data
-#     io.of('/room').emit('msg', data);
-#     # io.sockets.emit "msg", data
-
-
-#   socket.on "others", (data) ->
-#     # sending to all clients except sender
-#     console.log data
-#     socket.broadcast.emit "msg", data
-
-
-#   socket.on "caller", (data) ->
-#     console.log data
-#     socket.broadcast.emit "msg", data
